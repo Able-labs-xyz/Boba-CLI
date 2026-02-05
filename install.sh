@@ -4,7 +4,7 @@
 # Installs the Boba CLI and optionally configures Claude Desktop/Code
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/boba-labs/boba-cli/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/Able-labs-xyz/Boba-CLI/main/install.sh | bash
 #
 # Or with options:
 #   curl -fsSL ... | bash -s -- --skip-claude

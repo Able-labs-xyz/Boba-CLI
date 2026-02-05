@@ -17,9 +17,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/boba-labs/boba-cli.git"
+    "url": "https://github.com/Able-labs-xyz/Boba-CLI.git"
   },
-  "homepage": "https://github.com/boba-labs/boba-cli#readme",
+  "homepage": "https://github.com/Able-labs-xyz/Boba-CLI#readme",
   "keywords": [
     "boba",
     "trading",
@@ -28,7 +28,7 @@
     "mcp",
     "claude"
   ],
-  "author": "Boba Labs",
+  "author": "Boba",
   "license": "MIT",
   "dependencies": {
     "asciichart": "^1.5.25",

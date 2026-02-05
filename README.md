@@ -1,140 +1,119 @@
-# 🧋 Boba CLI
+<p align="center">
+<pre>
+██████╗  ██████╗ ██████╗  █████╗
+██╔══██╗██╔═══██╗██╔══██╗██╔══██╗
+██████╔╝██║   ██║██████╔╝███████║
+██╔══██╗██║   ██║██╔══██╗██╔══██║
+██████╔╝╚██████╔╝██████╔╝██║  ██║
+╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
+</pre>
+</p>
 
-Connect AI agents (like Claude) to Boba trading without exposing credentials.
+<p align="center">
+  <img src="https://img.shields.io/npm/v/@boba/cli?color=B184F5&style=flat-square" alt="npm version" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18-B184F5?style=flat-square" alt="node version" />
+  <img src="https://img.shields.io/badge/license-MIT-B184F5?style=flat-square" alt="license" />
+</p>
 
-## Quick Start
+<h4 align="center">Connect Claude to Boba trading in seconds.</h4>
+
+<p align="center">
+  <a href="#install">Install</a> •
+  <a href="#setup">Setup</a> •
+  <a href="#usage">Usage</a> •
+  <a href="#commands">Commands</a>
+</p>
+
+---
+
+## Install
 
 ```bash
-# Install globally
+curl -fsSL https://raw.githubusercontent.com/Able-labs-xyz/Boba-CLI/main/install.sh | bash
+```
+
+Or with npm:
+```bash
 npm install -g @boba/cli
+```
 
-# Initialize with your agent credentials (from agents.boba.xyz)
+## Setup
+
+**1. Get your agent credentials** from [agents.boba.xyz](https://agents.boba.xyz)
+
+**2. Initialize the CLI:**
+```bash
 boba init
-
-# Start the proxy server
-boba start
 ```
 
-## How It Works
-
-```
-┌──────────────┐      ┌─────────────┐      ┌───────────────┐
-│Claude Desktop│─────▶│  boba-cli   │─────▶│  Hosted MCP   │
-│  (no creds)  │      │ (has creds) │      │  (Railway)    │
-└──────────────┘      └─────────────┘      └───────────────┘
-     localhost:3456        JWT auth           Backend API
+**3. Configure Claude (auto):**
+```bash
+boba install
 ```
 
-1. **Claude never has direct credentials** - only connects to localhost
-2. **You control access** - stop the CLI anytime to revoke
-3. **Full audit trail** - CLI logs all agent activity
+**4. Start trading:**
+```bash
+boba launch
+```
+
+That's it. Claude now has access to Boba trading tools.
+
+---
+
+## Usage
+
+```
+┌────────────────┐      ┌─────────────┐      ┌─────────────┐
+│  Claude        │ ───▶ │  Boba CLI   │ ───▶ │  Boba MCP   │
+│  (no creds)    │      │  (proxy)    │      │  (backend)  │
+└────────────────┘      └─────────────┘      └─────────────┘
+    localhost              JWT auth             trading API
+```
+
+- **Claude never sees your credentials** — only connects to localhost
+- **You control access** — stop the proxy anytime
+- **Full audit trail** — all tool calls are logged
+
+---
 
 ## Commands
 
-### `boba init`
+| Command | Description |
+|---------|-------------|
+| `boba init` | Set up agent credentials |
+| `boba proxy` | Start the MCP proxy server |
+| `boba install` | Auto-configure Claude Desktop & Code |
+| `boba launch` | Start proxy + open Claude |
+| `boba status` | Show connection status |
+| `boba logout` | Clear credentials |
 
-Initialize with your agent credentials from [agents.boba.xyz](https://agents.boba.xyz).
-
-```bash
-# Interactive mode
-boba init
-
-# Or pass credentials directly
-boba init --agent-id YOUR_AGENT_ID --secret YOUR_SECRET
-```
-
-### `boba start`
-
-Start the proxy server for Claude to connect to.
+### Quick Examples
 
 ```bash
-# Default port 3456
-boba start
+# Start proxy on custom port
+boba proxy --port 4000
 
-# Custom port
-boba start --port 3000
+# Install for Claude Desktop only
+boba install --desktop
+
+# Install for Claude Code only
+boba install --code
+
+# Launch with Claude Desktop instead of Code
+boba launch --desktop
 ```
 
-### `boba status`
-
-Show current connection status and configuration.
-
-```bash
-boba status
-```
-
-### `boba logout`
-
-Clear stored credentials.
-
-```bash
-boba logout
-```
-
-### `boba config`
-
-View or update configuration.
-
-```bash
-# View current config
-boba config
-
-# Set custom MCP URL
-boba config --mcp-url https://your-mcp.example.com
-
-# Reset to defaults
-boba config --reset
-```
-
-### `boba auth`
-
-Test authentication without starting the proxy.
-
-```bash
-boba auth
-```
-
-## Claude Desktop Configuration
-
-Add this to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "boba": {
-      "command": "curl",
-      "args": [
-        "-X", "POST",
-        "-H", "Content-Type: application/json",
-        "-d", "{\"tool\": \"get_portfolio\", \"args\": {}}",
-        "http://127.0.0.1:3456/call"
-      ]
-    }
-  }
-}
-```
-
-Or use the HTTP endpoint directly with any MCP-compatible client.
+---
 
 ## Security
 
-- Credentials are stored securely in `~/.config/boba-cli/`
-- Agent secrets are never logged
-- All traffic to the backend is over HTTPS
-- You can revoke agent access anytime at agents.boba.xyz
+- Secrets stored in OS keychain (macOS Keychain, Windows Credential Manager)
+- All backend traffic over HTTPS
+- Revoke access anytime at [agents.boba.xyz](https://agents.boba.xyz)
 
-## Development
+## Disclaimer
 
-```bash
-# Install dependencies
-npm install
-
-# Build
-npm run build
-
-# Run in development
-npm run dev
-```
+This software is experimental and provided "as is" without warranty of any kind. Use at your own risk. Boba assumes no liability for any losses, damages, or issues arising from the use of this tool. Trading involves significant risk — never trade more than you can afford to lose.
 
 ## License
 
