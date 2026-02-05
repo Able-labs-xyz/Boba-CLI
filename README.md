@@ -1,13 +1,11 @@
-<p align="center">
-<pre>
-██████╗  ██████╗ ██████╗  █████╗
-██╔══██╗██╔═══██╗██╔══██╗██╔══██╗
-██████╔╝██║   ██║██████╔╝███████║
-██╔══██╗██║   ██║██╔══██╗██╔══██║
-██████╔╝╚██████╔╝██████╔╝██║  ██║
-╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
-</pre>
-</p>
+```
+                    ██████╗  ██████╗ ██████╗  █████╗
+                    ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗
+                    ██████╔╝██║   ██║██████╔╝███████║
+                    ██╔══██╗██║   ██║██╔══██╗██╔══██║
+                    ██████╔╝╚██████╔╝██████╔╝██║  ██║
+                    ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
+```
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/@boba/cli?color=B184F5&style=flat-square" alt="npm version" />
@@ -15,7 +13,7 @@
   <img src="https://img.shields.io/badge/license-MIT-B184F5?style=flat-square" alt="license" />
 </p>
 
-<h4 align="center">Connect Claude to Boba trading in seconds.</h4>
+<p align="center">Connect Claude to Boba trading in seconds.</p>
 
 <p align="center">
   <a href="#install">Install</a> •
@@ -111,10 +109,20 @@ boba launch --desktop
 - All backend traffic over HTTPS
 - Revoke access anytime at [agents.boba.xyz](https://agents.boba.xyz)
 
-## Disclaimer
-
-This software is experimental and provided "as is" without warranty of any kind. Use at your own risk. Boba assumes no liability for any losses, damages, or issues arising from the use of this tool. Trading involves significant risk — never trade more than you can afford to lose.
+---
 
 ## License
 
 MIT
+
+---
+
+> **⚠️ DISCLAIMER**
+>
+> **This software is experimental.** It is provided "as is" without warranty of any kind, express or implied.
+>
+> **Use at your own risk.** Boba assumes no liability or responsibility for any losses, damages, or issues arising from the use of this software.
+>
+> **Trading involves significant financial risk.** You could lose some or all of your funds. Never trade more than you can afford to lose. Past performance does not guarantee future results.
+>
+> By using this software, you acknowledge that you understand these risks and agree to hold Boba harmless from any claims or damages.
