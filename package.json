@@ -1,5 +1,5 @@
 {
-  "name": "@boba/cli",
+  "name": "@tradeboba/cli",
   "version": "0.1.0",
   "description": "Boba Agent CLI - Connect AI agents to Boba trading",
   "type": "module",

@@ -112,9 +112,9 @@ install_boba() {
   echo ""
 
   # Install globally
-  npm install -g @boba/cli 2>&1 &
+  npm install -g @tradeboba/cli 2>&1 &
   local pid=$!
-  spin $pid "Installing @boba/cli globally..."
+  spin $pid "Installing @tradeboba/cli globally..."
   wait $pid
   local exit_code=$?
 
@@ -124,7 +124,7 @@ install_boba() {
     print_error "Failed to install Boba CLI"
     echo ""
     echo "Try installing manually:"
-    echo "  npm install -g @boba/cli"
+    echo "  npm install -g @tradeboba/cli"
     exit 1
   fi
 
@@ -147,7 +147,7 @@ configure_claude() {
   if command -v boba &> /dev/null; then
     boba install --desktop --code
   else
-    npx -y @boba/cli install --desktop --code
+    npx -y @tradeboba/cli install --desktop --code
   fi
 }
 

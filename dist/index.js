@@ -396,7 +396,7 @@ program
                 execSync('which npx', { stdio: ['pipe', 'pipe', 'pipe'] });
             }
             bobaCommand = 'npx';
-            bobaArgs = ['-y', '@boba/cli', 'mcp'];
+            bobaArgs = ['-y', '@tradeboba/cli', 'mcp'];
             installMethod = 'npx';
         }
         catch {
@@ -543,7 +543,7 @@ program
     console.log(B('  ╠════════════════════════════════════════════╣'));
     console.log(B('  ║') + D(make('              CONFIGURATION                 ')) + B('║'));
     console.log(B('  ╠════════════════════════════════════════════╣'));
-    const methodLabel = installMethod === 'global' ? 'Global (boba)' : installMethod === 'npx' ? 'NPX (@boba/cli)' : 'Local (node)';
+    const methodLabel = installMethod === 'global' ? 'Global (boba)' : installMethod === 'npx' ? 'NPX (@tradeboba/cli)' : 'Local (node)';
     console.log(B('  ║') + D(make(`  Method: ${methodLabel}`)) + B('║'));
     const cmdDisplay = `${bobaCommand} ${bobaArgs.join(' ')}`;
     console.log(B('  ║') + D(make(`  Command: ${cmdDisplay.slice(0, 33)}`)) + B('║'));

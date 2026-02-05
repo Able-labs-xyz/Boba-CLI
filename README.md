@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/npm/v/@boba/cli?color=B184F5&style=flat-square" alt="npm" />
+  <img src="https://img.shields.io/npm/v/@tradeboba/cli?color=B184F5&style=flat-square" alt="npm" />
   <img src="https://img.shields.io/badge/node-%3E%3D18-B184F5?style=flat-square" alt="node" />
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-B184F5?style=flat-square" alt="platform" />
   <img src="https://img.shields.io/badge/license-MIT-B184F5?style=flat-square" alt="license" />
@@ -33,12 +33,12 @@ curl -fsSL https://raw.githubusercontent.com/Able-labs-xyz/Boba-CLI/main/install
 
 **npm**
 ```bash
-npm install -g @boba/cli
+npm install -g @tradeboba/cli
 ```
 
 **yarn**
 ```bash
-yarn global add @boba/cli
+yarn global add @tradeboba/cli
 ```
 
 </details>
