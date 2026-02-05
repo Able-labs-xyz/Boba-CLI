@@ -1,0 +1,25 @@
+# Source files (dist is published)
+src/
+tsconfig.json
+
+# Dev files
+*.log
+.DS_Store
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Editor
+.vscode/
+.idea/
+
+# Test files
+*.test.ts
+*.spec.ts
+__tests__/
+coverage/
+
+# Install script (hosted separately)
+install.sh

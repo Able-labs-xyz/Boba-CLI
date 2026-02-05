@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output (uncomment if you want to track dist)
+# dist/
+
+# Lock files (keep one)
+pnpm-lock.yaml
+
+# Logs
+*.log
+DEBUG_LOGS.md
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
