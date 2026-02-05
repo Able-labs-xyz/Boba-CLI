@@ -15,127 +15,31 @@ const errorGrad = gradient(['#FF6B6B', '#FF8E8E']);
 export const bobaGradient = (text) => bobaGrad(text);
 export const successGradient = (text) => successGrad(text);
 export const errorGradient = (text) => errorGrad(text);
-// Bouncy boba frames - smaller cute glasses character (padded to align with box)
-const bobaFrames = [
-    // Frame 1: Squished (gearing up)
-    [
-        `                                              `,
-        `                                              `,
-        `                                              `,
-        `                                              `,
-        `                                              `,
-        `              AAA            AAA              `,
-        `             AAAAA          AAAAAA            `,
-        `            AAAAAAAAAAAAAAAAAAAAAAA           `,
-        `           AAAAAAAAAAAAAAAAAAAAAAAAA          `,
-        `          AAAAAAAAAAAAAAAAAAAAAAAAAAA         `,
-        `         AAAAAA     AAAAAA     AAAAAAA        `,
-        `         AAAAAAA     AAAAAA     AAAAAA        `,
-        `         AAAAAAAA    AAAAAAA    AAAAAA        `,
-        `         AAAAAA     AAAAAA     AAAAAAA        `,
-        `         AAAAAAAAAAAAAAAAAAAAAAAAAAAA         `,
-        `           AAAAAAAAAAA  AAAAAAAAAAAA          `,
-        `             AAAAAAAAAAAAAAAAAAAAAA           `,
-        `                 AAAAAAAAAAAAAA               `,
-        `                                              `,
-        `                                              `,
-    ],
-    // Frame 2: Normal
-    [
-        `                                              `,
-        `                                              `,
-        `                                              `,
-        `                AA          AA                `,
-        `              AAAAA        AAAAA              `,
-        `             AAAAAAAAAAAAAAAAAAAA             `,
-        `            AAAAAAAAAAAAAAAAAAAAAA            `,
-        `           AAAAAAAAAAAAAAAAAAAAAAAA           `,
-        `          AAAAAA    AAAAAA    AAAAAA          `,
-        `          AAAAAA     AAAAA     AAAAA          `,
-        `          AAAAAAAA   AAAAAAA   AAAAA          `,
-        `          AAAAAA    AAAAAA    AAAAAA          `,
-        `          AAAAAAAAAAAAAAAAAAAAAAAAAA          `,
-        `           AAAAAAAAAAA  AAAAAAAAAAA           `,
-        `            AAAAAAAAAAAAAAAAAAAAAA            `,
-        `               AAAAAAAAAAAAAAAAA              `,
-        `                   AAAAAAAA                   `,
-        `                                              `,
-        `                                              `,
-        `                                              `,
-    ],
-    // Frame 3: Stretched (jumping up)
-    [
-        `                                              `,
-        `               AA          AA                 `,
-        `              AAAA        AAAA                `,
-        `             AAAAAA      AAAAAA               `,
-        `            AAAAAAAAAAAAAAAAAAAA              `,
-        `           AAAAAAAAAAAAAAAAAAAAAA             `,
-        `           AAAAAAAAAAAAAAAAAAAAAAA            `,
-        `           AAAAA   AAAAAA   AAAAAA            `,
-        `           AAAA      AAAA     AAAA            `,
-        `           AAAAAAA   AAAAAA   AAAA            `,
-        `           AAAAA     AAAA     AAAA            `,
-        `           AAAAAAAAAAAAAAAAAAAAAAA            `,
-        `           AAAAAAAAAAAAAAAAAAAAAAA            `,
-        `            AAAAAAAAAA  AAAAAAAAAA            `,
-        `             AAAAAAAAAAAAAAAAAAAA             `,
-        `              AAAAAAAAAAAAAAAAAA              `,
-        `                AAAAAAAAAAAAAA                `,
-        `                   AAAAAAAA                   `,
-        `                                              `,
-        `                                              `,
-    ],
-    // Frame 4: Normal (coming down) - same as frame 2
-    [
-        `                                              `,
-        `                                              `,
-        `                                              `,
-        `                AA          AA                `,
-        `              AAAAA        AAAAA              `,
-        `             AAAAAAAAAAAAAAAAAAAA             `,
-        `            AAAAAAAAAAAAAAAAAAAAAA            `,
-        `           AAAAAAAAAAAAAAAAAAAAAAAA           `,
-        `          AAAAAA    AAAAAAA   AAAAAA          `,
-        `          AAAAA      AAAAA     AAAAA          `,
-        `          AAAAAAAA   AAAAAAA   AAAAA          `,
-        `          AAAAAA    AAAAAA    AAAAAA          `,
-        `          AAAAAAAAAAAAAAAAAAAAAAAAAA          `,
-        `           AAAAAAAAAAA  AAAAAAAAAAA           `,
-        `            AAAAAAAAAAAAAAAAAAAAAA            `,
-        `               AAAAAAAAAAAAAAAAA              `,
-        `                   AAAAAAAA                   `,
-        `                                              `,
-        `                                              `,
-        `                                              `,
-    ],
+// BOBA AGENTS ASCII logo (matches agents-web frontend)
+const BOBA_LOGO = [
+    `        ██████╗  ██████╗ ██████╗  █████╗        `,
+    `        ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗       `,
+    `        ██████╔╝██║   ██║██████╔╝███████║       `,
+    `        ██╔══██╗██║   ██║██╔══██╗██╔══██║       `,
+    `        ██████╔╝╚██████╔╝██████╔╝██║  ██║       `,
+    `        ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝       `,
+    `                             A G E N T S       `,
 ];
-// BOBA text to show below the bouncing character
-const BOBA_TEXT = [
-    `            ██████╗  ██████╗ ██████╗  █████╗             `,
-    `            ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗            `,
-    `            ██████╔╝██║   ██║██████╔╝███████║            `,
-    `            ██╔══██╗██║   ██║██╔══██╗██╔══██║            `,
-    `            ██████╔╝╚██████╔╝██████╔╝██║  ██║            `,
-    `            ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝            `,
-];
-// Colorize a frame - replace A with matcha color blocks
-function colorizeFrame(frame) {
-    return frame.map(line => {
-        return line.replace(/A/g, matcha('█'));
-    }).join('\n');
+// Legacy bobaFrames for backward compatibility (uses logo)
+const bobaFrames = [BOBA_LOGO, BOBA_LOGO, BOBA_LOGO, BOBA_LOGO];
+// Colorize the BOBA logo
+function colorizeLogo() {
+    return BOBA_LOGO.map(line => matcha(line)).join('\n');
 }
-// Colorize BOBA text
-function colorizeBoba() {
-    return BOBA_TEXT.map(line => matchaBright(line)).join('\n');
+// Colorize a frame (for backward compatibility)
+function colorizeFrame(frame) {
+    return frame.map(line => matcha(line)).join('\n');
 }
 export const BOBA_MINI = `${matcha('🧋 boba')}`;
-// Static boba character display (uses frame 2 - normal position)
+// Print the BOBA AGENTS banner
 export function printBanner() {
-    console.log(colorizeFrame(bobaFrames[1]));
     console.log();
-    console.log(matchaBright('                    🧋 BOBA AGENT CLI'));
-    console.log(matchaDim('               AI Trading Made Simple'));
+    console.log(colorizeLogo());
     console.log();
 }
 export function printStartup() {

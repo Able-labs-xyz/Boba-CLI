@@ -144,7 +144,7 @@ program
         console.log(`  ${matchaDim('Solana:')}    ${matchaDim(tokens.solanaAddress)}`);
       }
       console.log();
-      console.log(`  ${matcha('Run')} ${matchaBright('boba start')} ${matcha('to start the proxy server')}`);
+      console.log(`  ${matcha('Next:')} ${matchaBright('boba install')} ${matcha('then')} ${matchaBright('boba launch')}`);
       console.log();
     } else {
       await config.clearCredentials();
@@ -412,6 +412,8 @@ program
   .description('Install boba MCP server for Claude Desktop and Claude Code')
   .option('--desktop-only', 'Only install for Claude Desktop')
   .option('--code-only', 'Only install for Claude Code')
+  .option('--global', 'Install for Claude Code globally (all projects)')
+  .option('--project <path>', 'Install for a specific project directory')
   .action(async (options) => {
     printBanner();
     console.log();
@@ -538,29 +540,47 @@ program
           }
         }
 
-        // Add to the home directory project (global fallback)
-        if (!codeConfig.projects[homeDir]) {
-          codeConfig.projects[homeDir] = {
-            allowedTools: [],
-            mcpContextUris: [],
-            mcpServers: {},
-            enabledMcpjsonServers: [],
-            disabledMcpjsonServers: [],
-          };
+        // Determine which project path(s) to install to
+        const projectPaths: { path: string; label: string }[] = [];
+
+        if (options.global) {
+          // Global install - use home directory
+          projectPaths.push({ path: homeDir, label: 'Claude Code (global)' });
+        } else if (options.project) {
+          // Specific project path
+          const projectPath = path.resolve(options.project);
+          projectPaths.push({ path: projectPath, label: `Claude Code (${path.basename(projectPath)})` });
+        } else {
+          // Default: install to current working directory
+          const cwd = process.cwd();
+          projectPaths.push({ path: cwd, label: `Claude Code (${path.basename(cwd)})` });
         }
 
-        if (!codeConfig.projects[homeDir].mcpServers) {
-          codeConfig.projects[homeDir].mcpServers = {};
-        }
+        for (const { path: projectPath, label } of projectPaths) {
+          if (!codeConfig.projects[projectPath]) {
+            codeConfig.projects[projectPath] = {
+              allowedTools: [],
+              mcpContextUris: [],
+              mcpServers: {},
+              enabledMcpjsonServers: [],
+              disabledMcpjsonServers: [],
+            };
+          }
 
-        const hadBoba = !!codeConfig.projects[homeDir].mcpServers.boba;
-        codeConfig.projects[homeDir].mcpServers.boba = bobaConfig;
+          if (!codeConfig.projects[projectPath].mcpServers) {
+            codeConfig.projects[projectPath].mcpServers = {};
+          }
+
+          const hadBoba = !!codeConfig.projects[projectPath].mcpServers.boba;
+          codeConfig.projects[projectPath].mcpServers.boba = bobaConfig;
+
+          results.push({
+            target: label,
+            status: hadBoba ? 'updated' : 'installed',
+          });
+        }
 
         fs.writeFileSync(codeConfigPath, JSON.stringify(codeConfig, null, 2));
-        results.push({
-          target: 'Claude Code (global)',
-          status: hadBoba ? 'updated' : 'installed',
-        });
       } catch (err: any) {
         results.push({
           target: 'Claude Code',
@@ -616,9 +636,8 @@ program
     console.log(B('  ║') + D(make('                NEXT STEPS                  ')) + B('║'));
     console.log(B('  ╠════════════════════════════════════════════╣'));
     console.log(B('  ║') + D(make('  1. Run: boba init  (if not done)          ')) + B('║'));
-    console.log(B('  ║') + D(make('  2. Run: boba start                        ')) + B('║'));
-    console.log(B('  ║') + D(make('  3. Restart Claude Desktop/Code            ')) + B('║'));
-    console.log(B('  ║') + D(make('  4. Boba tools will be available!          ')) + B('║'));
+    console.log(B('  ║') + D(make('  2. Run: boba launch                       ')) + B('║'));
+    console.log(B('  ║') + D(make('  3. Boba tools will be available!          ')) + B('║'));
     console.log(B('  ╚════════════════════════════════════════════╝'));
     console.log();
   });
@@ -654,6 +673,61 @@ program
     const B = matchaBright;
     const G = matcha;
     const D = matchaDim;
+
+    // Auto-install MCP for current directory
+    const fs = await import('fs');
+    const path = await import('path');
+    const cwd = process.cwd();
+    const homeDir = os.homedir();
+    const codeConfigPath = path.join(homeDir, '.claude.json');
+
+    console.log(`  ${G('●')} Ensuring boba MCP is configured for this directory...`);
+
+    try {
+      let codeConfig: any = { projects: {} };
+
+      if (fs.existsSync(codeConfigPath)) {
+        const content = fs.readFileSync(codeConfigPath, 'utf-8');
+        codeConfig = JSON.parse(content);
+        if (!codeConfig.projects) {
+          codeConfig.projects = {};
+        }
+      }
+
+      // Find boba command
+      let bobaCommand = 'boba';
+      let bobaArgs = ['mcp'];
+      try {
+        execSync('which boba', { stdio: ['pipe', 'pipe', 'pipe'] });
+      } catch {
+        bobaCommand = 'npx';
+        bobaArgs = ['-y', '@tradeboba/cli', 'mcp'];
+      }
+
+      const bobaConfig = { command: bobaCommand, args: bobaArgs };
+
+      // Ensure current directory has boba MCP configured
+      if (!codeConfig.projects[cwd]) {
+        codeConfig.projects[cwd] = {
+          allowedTools: [],
+          mcpContextUris: [],
+          mcpServers: {},
+          enabledMcpjsonServers: [],
+          disabledMcpjsonServers: [],
+        };
+      }
+      if (!codeConfig.projects[cwd].mcpServers) {
+        codeConfig.projects[cwd].mcpServers = {};
+      }
+
+      const hadBoba = !!codeConfig.projects[cwd].mcpServers?.boba;
+      codeConfig.projects[cwd].mcpServers.boba = bobaConfig;
+
+      fs.writeFileSync(codeConfigPath, JSON.stringify(codeConfig, null, 2));
+      console.log(`  ${G('✓')} MCP ${hadBoba ? 'verified' : 'installed'} for ${path.basename(cwd)}`);
+    } catch (err: any) {
+      logger.warning(`Could not auto-configure MCP: ${err.message}`);
+    }
 
     console.log(`  ${G('●')} Launching boba proxy...`);
 
@@ -702,7 +776,6 @@ program
       } else {
         // Open Claude Code in a new terminal window (needs TTY)
         console.log(`  ${G('●')} Opening Claude Code...`);
-        const cwd = process.cwd();
         try {
           if (options.iterm) {
             const script = `
