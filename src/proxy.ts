@@ -165,6 +165,10 @@ export function createProxyServer(): ProxyServer {
       'create_limit_order',
       'cancel_limit_order',
       'get_user_swaps',
+      'refresh_native_balances',
+      'start_portfolio_stream',
+      'get_portfolio_price_updates',
+      'stop_portfolio_stream',
     ];
 
     // Helper to check if a value looks like a fake/placeholder ID or wrong type
