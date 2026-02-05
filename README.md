@@ -1,23 +1,26 @@
 <p align="center">
-  <img src="./assets/logo.svg" alt="BOBA" width="400" />
+  <img src="./assets/logo.svg" alt="BOBA AGENTS" width="400" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/npm/v/@boba/cli?color=B184F5&style=flat-square" alt="npm version" />
-  <img src="https://img.shields.io/badge/node-%3E%3D18-B184F5?style=flat-square" alt="node version" />
+  <img src="https://img.shields.io/npm/v/@boba/cli?color=B184F5&style=flat-square" alt="npm" />
+  <img src="https://img.shields.io/badge/node-%3E%3D18-B184F5?style=flat-square" alt="node" />
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-B184F5?style=flat-square" alt="platform" />
   <img src="https://img.shields.io/badge/license-MIT-B184F5?style=flat-square" alt="license" />
 </p>
 
-<p align="center">Connect Claude to Boba trading in seconds.</p>
-
 <p align="center">
-  <a href="#install">Install</a> •
-  <a href="#setup">Setup</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#commands">Commands</a>
+  <b>Connect Claude to Boba trading in seconds.</b>
 </p>
 
----
+<p align="center">
+  <a href="#install">Install</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#commands">Commands</a> ·
+  <a href="#how-it-works">How It Works</a>
+</p>
+
+<br />
 
 ## Install
 
@@ -25,99 +28,104 @@
 curl -fsSL https://raw.githubusercontent.com/Able-labs-xyz/Boba-CLI/main/install.sh | bash
 ```
 
-Or with npm:
+<details>
+<summary>Other installation methods</summary>
+
+**npm**
 ```bash
 npm install -g @boba/cli
 ```
 
-## Setup
-
-**1. Get your agent credentials** from [agents.boba.xyz](https://agents.boba.xyz)
-
-**2. Initialize the CLI:**
+**yarn**
 ```bash
+yarn global add @boba/cli
+```
+
+</details>
+
+<br />
+
+## Quick Start
+
+```bash
+# 1. Set up your agent credentials (from agents.boba.xyz)
 boba init
-```
 
-**3. Configure Claude (auto):**
-```bash
+# 2. Configure Claude Desktop & Claude Code
 boba install
-```
 
-**4. Start trading:**
-```bash
+# 3. Launch everything
 boba launch
 ```
 
-That's it. Claude now has access to Boba trading tools.
-
----
-
-## Usage
-
-```
-┌────────────────┐      ┌─────────────┐      ┌─────────────┐
-│  Claude        │ ───▶ │  Boba CLI   │ ───▶ │  Boba MCP   │
-│  (no creds)    │      │  (proxy)    │      │  (backend)  │
-└────────────────┘      └─────────────┘      └─────────────┘
-    localhost              JWT auth             trading API
-```
-
-- **Claude never sees your credentials** — only connects to localhost
-- **You control access** — stop the proxy anytime
-- **Full audit trail** — all tool calls are logged
-
----
+<br />
 
 ## Commands
 
 | Command | Description |
-|---------|-------------|
+|:--------|:------------|
 | `boba init` | Set up agent credentials |
-| `boba proxy` | Start the MCP proxy server |
+| `boba start` | Start the MCP proxy server |
 | `boba install` | Auto-configure Claude Desktop & Code |
 | `boba launch` | Start proxy + open Claude |
 | `boba status` | Show connection status |
-| `boba logout` | Clear credentials |
+| `boba config` | View or update configuration |
+| `boba logout` | Clear stored credentials |
 
-### Quick Examples
+<details>
+<summary>Command options</summary>
 
 ```bash
-# Start proxy on custom port
-boba proxy --port 4000
-
-# Install for Claude Desktop only
-boba install --desktop
-
-# Install for Claude Code only
-boba install --code
-
-# Launch with Claude Desktop instead of Code
-boba launch --desktop
+boba start --port 4000           # Custom port
+boba install --desktop-only      # Claude Desktop only
+boba install --code-only         # Claude Code only
+boba launch --desktop            # Open Desktop instead of Code
+boba launch --iterm              # Use iTerm instead of Terminal
 ```
 
----
+</details>
+
+<br />
+
+## How It Works
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   Claude    │ ───▶ │  Boba CLI   │ ───▶ │  Boba MCP   │
+│  (no creds) │      │   (proxy)   │      │  (backend)  │
+└─────────────┘      └─────────────┘      └─────────────┘
+   localhost            JWT auth           trading API
+```
+
+- Claude never sees your credentials
+- You control access — stop the proxy anytime
+- Full audit trail — all tool calls logged
+
+<br />
 
 ## Security
 
-- Secrets stored in OS keychain (macOS Keychain, Windows Credential Manager)
-- All backend traffic over HTTPS
-- Revoke access anytime at [agents.boba.xyz](https://agents.boba.xyz)
+| | |
+|:--|:--|
+| **Credential Storage** | OS Keychain (macOS Keychain, Windows Credential Manager) |
+| **Transport** | HTTPS only |
+| **Access Control** | Revoke anytime at [agents.boba.xyz](https://agents.boba.xyz) |
 
----
+<br />
 
 ## License
 
 MIT
 
+<br />
+
 ---
 
-> **⚠️ DISCLAIMER**
+<br />
+
+> [!WARNING]
+> **This software is experimental.** Provided "as is" without warranty of any kind.
 >
-> **This software is experimental.** It is provided "as is" without warranty of any kind, express or implied.
+> **Use at your own risk.** Boba assumes no liability for any losses or damages arising from use of this software.
 >
-> **Use at your own risk.** Boba assumes no liability or responsibility for any losses, damages, or issues arising from the use of this software.
->
-> **Trading involves significant financial risk.** You could lose some or all of your funds. Never trade more than you can afford to lose. Past performance does not guarantee future results.
->
-> By using this software, you acknowledge that you understand these risks and agree to hold Boba harmless from any claims or damages.
+> **Trading involves significant financial risk.** Never trade more than you can afford to lose.
