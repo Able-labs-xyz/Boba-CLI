@@ -61,6 +61,48 @@ async function registerWithLimitOrders(tokens: AuthTokens): Promise<void> {
   }
 }
 
+/**
+ * Initialize wallet monitoring with portfolio service.
+ * This registers the agent's wallets in Redis for real-time tracking.
+ */
+async function initializeWalletMonitoring(tokens: AuthTokens): Promise<void> {
+  const authUrl = config.getAuthUrl();
+  // Derive portfolio URL from auth URL (same gateway)
+  const portfolioUrl = authUrl.replace('/v2', '/v2/portfolio');
+
+  try {
+    logger.info('Initializing wallet monitoring...');
+
+    const response = await axios.post(
+      `${portfolioUrl}/${tokens.agentId}/wallets/init`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${tokens.accessToken}`,
+        },
+        timeout: 30000,
+      }
+    );
+
+    const data = response.data;
+    if (data.subscribed > 0) {
+      logger.success(`Wallet monitoring initialized (${data.subscribed} wallets)`);
+    } else {
+      logger.warning('No wallets found to monitor');
+    }
+  } catch (error: any) {
+    // Non-fatal: log warning but don't fail authentication
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const message = error.response?.data?.error || error.message;
+      logger.warning(`Wallet monitoring init failed (${status}): ${message}`);
+    } else {
+      logger.warning(`Wallet monitoring init failed: ${error.message}`);
+    }
+  }
+}
+
 export async function authenticate(): Promise<AuthTokens | null> {
   const credentials = await config.getCredentials();
 
@@ -106,6 +148,9 @@ export async function authenticate(): Promise<AuthTokens | null> {
 
     // Register agent with limit-orders service for trade execution
     await registerWithLimitOrders(tokens);
+
+    // Initialize wallet monitoring with portfolio service
+    await initializeWalletMonitoring(tokens);
 
     return tokens;
   } catch (error: any) {
