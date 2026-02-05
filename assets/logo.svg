@@ -1,10 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140">
   <style>
     .logo {
       font-family: monospace;
       font-size: 14px;
       fill: #B184F5;
       font-weight: bold;
+    }
+    .agents {
+      font-family: monospace;
+      font-size: 14px;
+      fill: #B184F5;
+      letter-spacing: 0.3em;
     }
   </style>
   <text class="logo" x="50%" y="20" text-anchor="middle">██████╗  ██████╗ ██████╗  █████╗</text>
@@ -13,4 +19,5 @@
   <text class="logo" x="50%" y="68" text-anchor="middle">██╔══██╗██║   ██║██╔══██╗██╔══██║</text>
   <text class="logo" x="50%" y="84" text-anchor="middle">██████╔╝╚██████╔╝██████╔╝██║  ██║</text>
   <text class="logo" x="50%" y="100" text-anchor="middle">╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝</text>
+  <text class="agents" x="50%" y="125" text-anchor="middle">A G E N T S</text>
 </svg>
