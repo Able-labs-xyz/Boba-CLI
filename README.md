@@ -1,11 +1,6 @@
-```
-                    ██████╗  ██████╗ ██████╗  █████╗
-                    ██╔══██╗██╔═══██╗██╔══██╗██╔══██╗
-                    ██████╔╝██║   ██║██████╔╝███████║
-                    ██╔══██╗██║   ██║██╔══██╗██╔══██║
-                    ██████╔╝╚██████╔╝██████╔╝██║  ██║
-                    ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
-```
+<p align="center">
+  <img src="./assets/logo.svg" alt="BOBA" width="400" />
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/@boba/cli?color=B184F5&style=flat-square" alt="npm version" />

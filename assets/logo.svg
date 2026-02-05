@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <style>
+    .logo {
+      font-family: monospace;
+      font-size: 14px;
+      fill: #B184F5;
+      font-weight: bold;
+    }
+  </style>
+  <text class="logo" x="50%" y="20" text-anchor="middle">██████╗  ██████╗ ██████╗  █████╗</text>
+  <text class="logo" x="50%" y="36" text-anchor="middle">██╔══██╗██╔═══██╗██╔══██╗██╔══██╗</text>
+  <text class="logo" x="50%" y="52" text-anchor="middle">██████╔╝██║   ██║██████╔╝███████║</text>
+  <text class="logo" x="50%" y="68" text-anchor="middle">██╔══██╗██║   ██║██╔══██╗██╔══██║</text>
+  <text class="logo" x="50%" y="84" text-anchor="middle">██████╔╝╚██████╔╝██████╔╝██║  ██║</text>
+  <text class="logo" x="50%" y="100" text-anchor="middle">╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝</text>
+</svg>
