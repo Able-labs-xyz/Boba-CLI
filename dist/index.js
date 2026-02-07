@@ -12,10 +12,16 @@ function showHelp() {
     console.clear();
     console.log(colorizeFrame(bobaFrames[1]));
     console.log();
-    console.log(matchaBright('  ╔════════════════════════════════════════════╗'));
-    console.log(matchaBright('  ║') + matcha('           🧋 BOBA AGENT CLI               ') + matchaBright('║'));
-    console.log(matchaBright('  ║') + matchaDim('     Connect AI agents to Boba trading     ') + matchaBright('║'));
-    console.log(matchaBright('  ╚════════════════════════════════════════════╝'));
+    const boxW = 44;
+    const centerText = (s) => {
+        const pad = Math.floor((boxW - s.length) / 2);
+        return ' '.repeat(pad) + s + ' '.repeat(boxW - pad - s.length);
+    };
+    console.log(matchaBright('  ╔' + '═'.repeat(boxW) + '╗'));
+    console.log(matchaBright('  ║') + matcha(centerText('BOBA AGENT CLI')) + matchaBright('║'));
+    console.log(matchaBright('  ║') + matchaDim(centerText('Connect AI agents to Boba trading')) + matchaBright('║'));
+    console.log(matchaBright('  ║') + matchaDim(centerText(`v${program.version()}`)) + matchaBright('║'));
+    console.log(matchaBright('  ╚' + '═'.repeat(boxW) + '╝'));
     console.log();
     console.log(matchaBright('  COMMANDS'));
     console.log(matchaDim('  ─────────────────────────────────────────────'));
@@ -42,7 +48,7 @@ function showHelp() {
 program
     .name('boba')
     .description('🧋 Boba Agent CLI - Connect AI agents to Boba trading')
-    .version('0.1.0')
+    .version('0.2.0')
     .helpOption('-h, --help', 'Show help menu')
     .addHelpCommand(false)
     .action(() => {
@@ -159,14 +165,14 @@ program
         const proxy = createProxyServer();
         spinner.succeed('Proxy server ready');
         // Handle shutdown
-        process.on('SIGINT', () => {
+        process.on('SIGINT', async () => {
             console.log();
             logger.info('Shutting down...');
-            proxy.stop();
+            await proxy.stop();
             process.exit(0);
         });
-        process.on('SIGTERM', () => {
-            proxy.stop();
+        process.on('SIGTERM', async () => {
+            await proxy.stop();
             process.exit(0);
         });
         await proxy.start();
@@ -187,7 +193,7 @@ program
     console.log(colorizeFrame(bobaFrames[1]));
     console.log();
     const creds = await config.getCredentials();
-    const tokens = config.getTokens();
+    const tokens = await config.getTokens();
     // Apply color to full 44-char string to avoid counting issues
     const B = matchaBright;
     const G = matcha;
@@ -263,6 +269,7 @@ program
     .option('--auth-url <url>', 'Set auth server URL')
     .option('--port <port>', 'Set default proxy port')
     .option('--reset', 'Reset all config to defaults')
+    .option('--force', 'Skip URL validation (for development)')
     .action(async (options) => {
     const B = matchaBright;
     const G = matcha;
@@ -286,12 +293,24 @@ program
         return;
     }
     if (options.mcpUrl) {
-        config.setMcpUrl(options.mcpUrl);
-        showUpdateBox('MCP URL:', options.mcpUrl);
+        try {
+            config.setMcpUrl(options.mcpUrl, options.force);
+            showUpdateBox('MCP URL:', options.mcpUrl);
+        }
+        catch (err) {
+            logger.error(err.message);
+            process.exit(1);
+        }
     }
     if (options.authUrl) {
-        config.setAuthUrl(options.authUrl);
-        showUpdateBox('Auth URL:', options.authUrl);
+        try {
+            config.setAuthUrl(options.authUrl, options.force);
+            showUpdateBox('Auth URL:', options.authUrl);
+        }
+        catch (err) {
+            logger.error(err.message);
+            process.exit(1);
+        }
     }
     if (options.port) {
         config.setProxyPort(parseInt(options.port));
@@ -585,7 +604,7 @@ program
     .option('--iterm', 'Use iTerm instead of Terminal.app')
     .action(async (options) => {
     const os = await import('os');
-    const { execSync, spawn } = await import('child_process');
+    const { execSync } = await import('child_process');
     const platform = os.platform();
     if (platform !== 'darwin') {
         logger.error('Launch command currently only supports macOS');
@@ -772,6 +791,27 @@ program
         console.log(JSON.stringify(error));
         process.exit(1);
     }
+    // Read per-session auth token from proxy (stored in OS keychain)
+    let currentSessionToken = await config.getSessionToken();
+    if (!currentSessionToken) {
+        const error = {
+            jsonrpc: '2.0',
+            id: null,
+            error: { code: -32603, message: 'Proxy session token not found. Is the proxy running?' },
+        };
+        console.log(JSON.stringify(error));
+        process.exit(1);
+    }
+    const getProxyHeaders = () => ({
+        Authorization: `Bearer ${currentSessionToken}`,
+    });
+    // Re-read session token from keychain (proxy may have restarted)
+    const refreshSessionToken = async () => {
+        const newToken = await config.getSessionToken();
+        if (newToken)
+            currentSessionToken = newToken;
+        return !!newToken;
+    };
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -790,7 +830,7 @@ program
                     result: {
                         protocolVersion: '2024-11-05',
                         capabilities: { tools: {} },
-                        serverInfo: { name: 'boba', version: '0.1.0' },
+                        serverInfo: { name: 'boba', version: '0.2.0' },
                     },
                 };
                 console.log(JSON.stringify(response));
@@ -802,7 +842,18 @@ program
                 // Get tools from proxy
                 try {
                     const axios = (await import('axios')).default;
-                    const toolsRes = await axios.get(`${proxyUrl}/tools`);
+                    let toolsRes;
+                    try {
+                        toolsRes = await axios.get(`${proxyUrl}/tools`, { headers: getProxyHeaders() });
+                    }
+                    catch (e) {
+                        if (e.response?.status === 403 && await refreshSessionToken()) {
+                            toolsRes = await axios.get(`${proxyUrl}/tools`, { headers: getProxyHeaders() });
+                        }
+                        else {
+                            throw e;
+                        }
+                    }
                     const response = {
                         jsonrpc: '2.0',
                         id,
@@ -824,10 +875,19 @@ program
                 const { name, arguments: args } = params;
                 try {
                     const axios = (await import('axios')).default;
-                    const result = await axios.post(`${proxyUrl}/call`, {
-                        tool: name,
-                        args: args || {},
-                    });
+                    const payload = { tool: name, args: args || {} };
+                    let result;
+                    try {
+                        result = await axios.post(`${proxyUrl}/call`, payload, { headers: getProxyHeaders() });
+                    }
+                    catch (e) {
+                        if (e.response?.status === 403 && await refreshSessionToken()) {
+                            result = await axios.post(`${proxyUrl}/call`, payload, { headers: getProxyHeaders() });
+                        }
+                        else {
+                            throw e;
+                        }
+                    }
                     const response = {
                         jsonrpc: '2.0',
                         id,

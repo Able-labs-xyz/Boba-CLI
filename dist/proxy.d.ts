@@ -1,6 +1,6 @@
 interface ProxyServer {
     start: () => Promise<void>;
-    stop: () => void;
+    stop: () => Promise<void>;
 }
 export declare function createProxyServer(): ProxyServer;
 export {};

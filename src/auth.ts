@@ -113,6 +113,12 @@ export async function authenticate(): Promise<AuthTokens | null> {
 
   const authUrl = config.getAuthUrl();
 
+  // Enforce HTTPS for non-local URLs to prevent credential exfiltration
+  if (!authUrl.startsWith('https://') && !authUrl.startsWith('http://localhost') && !authUrl.startsWith('http://127.0.0.1')) {
+    logger.error('Auth URL must use HTTPS (except localhost). Current: ' + authUrl);
+    return null;
+  }
+
   try {
     logger.info('Authenticating with Boba backend...');
 
@@ -143,7 +149,7 @@ export async function authenticate(): Promise<AuthTokens | null> {
       subOrganizationId: authData.sub_organization_id,
     };
 
-    config.setTokens(tokens);
+    await config.setTokens(tokens);
     logger.success(`Authenticated as ${tokens.agentName} (${tokens.agentId.slice(0, 8)}...)`);
 
     // Register agent with limit-orders service for trade execution
@@ -174,7 +180,7 @@ export async function authenticate(): Promise<AuthTokens | null> {
 }
 
 export async function refreshTokens(): Promise<AuthTokens | null> {
-  const tokens = config.getTokens();
+  const tokens = await config.getTokens();
 
   if (!tokens?.refreshToken) {
     logger.warning('No refresh token available. Re-authenticating...');
@@ -182,6 +188,12 @@ export async function refreshTokens(): Promise<AuthTokens | null> {
   }
 
   const authUrl = config.getAuthUrl();
+
+  // Enforce HTTPS for non-local URLs to prevent token exfiltration
+  if (!authUrl.startsWith('https://') && !authUrl.startsWith('http://localhost') && !authUrl.startsWith('http://127.0.0.1')) {
+    logger.error('Auth URL must use HTTPS (except localhost). Current: ' + authUrl);
+    return null;
+  }
 
   try {
     logger.info('Refreshing access token...');
@@ -205,7 +217,7 @@ export async function refreshTokens(): Promise<AuthTokens | null> {
       accessTokenExpiresAt: refreshData.access_token_expires_at,
     };
 
-    config.setTokens(newTokens);
+    await config.setTokens(newTokens);
     logger.success('Token refreshed');
 
     return newTokens;
@@ -217,7 +229,7 @@ export async function refreshTokens(): Promise<AuthTokens | null> {
 
 export async function ensureAuthenticated(): Promise<AuthTokens | null> {
   // Check if we have valid tokens
-  const tokens = config.getTokens();
+  const tokens = await config.getTokens();
 
   if (!tokens) {
     return authenticate();
@@ -231,7 +243,7 @@ export async function ensureAuthenticated(): Promise<AuthTokens | null> {
   return tokens;
 }
 
-export function getAccessToken(): string | null {
-  const tokens = config.getTokens();
+export async function getAccessToken(): Promise<string | null> {
+  const tokens = await config.getTokens();
   return tokens?.accessToken || null;
 }

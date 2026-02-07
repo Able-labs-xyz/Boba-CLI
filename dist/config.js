@@ -3,12 +3,33 @@ import keytar from 'keytar';
 import { logger } from './logger.js';
 const KEYCHAIN_SERVICE = 'boba-cli';
 const KEYCHAIN_ACCOUNT = 'agent-secret';
+const KEYCHAIN_ACCESS_TOKEN = 'access-token';
+const KEYCHAIN_REFRESH_TOKEN = 'refresh-token';
+const KEYCHAIN_SESSION_TOKEN = 'session-token';
+// In-memory cache for synchronous access in proxy hot path
+let _cachedTokens;
 const defaultConfig = {
     mcpUrl: 'https://mcp-skunk.up.railway.app',
     authUrl: 'https://krakend-skunk.up.railway.app/v2',
     proxyPort: 3456,
     logLevel: 'info',
 };
+// URL allowlist to prevent credential exfiltration via social engineering
+const ALLOWED_HOSTS = [
+    'mcp-skunk.up.railway.app',
+    'krakend-skunk.up.railway.app',
+    'localhost',
+    '127.0.0.1',
+];
+function isAllowedUrl(urlString) {
+    try {
+        const url = new URL(urlString);
+        return ALLOWED_HOSTS.includes(url.hostname);
+    }
+    catch {
+        return false;
+    }
+}
 // Config storage (non-sensitive data only - secrets go to OS keychain)
 const store = new Conf({
     projectName: 'boba-cli',
@@ -87,7 +108,7 @@ export const config = {
     },
     clearCredentials: async () => {
         store.delete('credentials');
-        store.delete('tokens');
+        await config.clearTokens();
         try {
             await keytar.deletePassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCOUNT);
         }
@@ -101,15 +122,75 @@ export const config = {
         // Note: can't check keychain synchronously, just check if agentId exists
         return !!creds?.agentId;
     },
-    // Tokens
-    getTokens: () => {
-        return store.get('tokens');
+    // Tokens — sensitive values in OS keychain, metadata on disk
+    getTokens: async () => {
+        const meta = store.get('tokens');
+        if (!meta?.agentId)
+            return undefined;
+        // Backward-compatible: if legacy plaintext tokens exist, use them
+        if (meta.accessToken) {
+            _cachedTokens = meta;
+            return _cachedTokens;
+        }
+        try {
+            const accessToken = await keytar.getPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCESS_TOKEN);
+            const refreshToken = await keytar.getPassword(KEYCHAIN_SERVICE, KEYCHAIN_REFRESH_TOKEN);
+            if (!accessToken)
+                return undefined;
+            const tokens = {
+                accessToken,
+                refreshToken: refreshToken || '',
+                accessTokenExpiresAt: meta.accessTokenExpiresAt,
+                refreshTokenExpiresAt: meta.refreshTokenExpiresAt,
+                agentId: meta.agentId,
+                agentName: meta.agentName,
+                evmAddress: meta.evmAddress,
+                solanaAddress: meta.solanaAddress,
+                subOrganizationId: meta.subOrganizationId,
+            };
+            _cachedTokens = tokens;
+            return tokens;
+        }
+        catch {
+            // Keychain not available, fall back to legacy
+            return meta.accessToken ? meta : undefined;
+        }
     },
-    setTokens: (tokens) => {
-        store.set('tokens', tokens);
+    // Synchronous cache for proxy hot path (health endpoint, display)
+    getTokensSync: () => {
+        return _cachedTokens || store.get('tokens');
     },
-    clearTokens: () => {
+    setTokens: async (tokens) => {
+        _cachedTokens = tokens;
+        try {
+            await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCESS_TOKEN, tokens.accessToken);
+            await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_REFRESH_TOKEN, tokens.refreshToken);
+        }
+        catch {
+            logger.warning('Could not store tokens in OS keychain, using fallback');
+            // Fallback: store everything in config (less secure, same as old behavior)
+            store.set('tokens', tokens);
+            return;
+        }
+        // Store only non-sensitive metadata on disk
+        store.set('tokens', {
+            accessTokenExpiresAt: tokens.accessTokenExpiresAt,
+            refreshTokenExpiresAt: tokens.refreshTokenExpiresAt,
+            agentId: tokens.agentId,
+            agentName: tokens.agentName,
+            evmAddress: tokens.evmAddress,
+            solanaAddress: tokens.solanaAddress,
+            subOrganizationId: tokens.subOrganizationId,
+        });
+    },
+    clearTokens: async () => {
+        _cachedTokens = undefined;
         store.delete('tokens');
+        try {
+            await keytar.deletePassword(KEYCHAIN_SERVICE, KEYCHAIN_ACCESS_TOKEN);
+            await keytar.deletePassword(KEYCHAIN_SERVICE, KEYCHAIN_REFRESH_TOKEN);
+        }
+        catch { /* ignore */ }
     },
     isTokenExpired: () => {
         const tokens = store.get('tokens');
@@ -124,13 +205,21 @@ export const config = {
     getMcpUrl: () => {
         return store.get('mcpUrl') || defaultConfig.mcpUrl;
     },
-    setMcpUrl: (url) => {
+    setMcpUrl: (url, force = false) => {
+        if (!force && !isAllowedUrl(url)) {
+            throw new Error(`Blocked: "${url}" is not an allowed MCP host. ` +
+                `Allowed: ${ALLOWED_HOSTS.join(', ')}. Use --force to override.`);
+        }
         store.set('mcpUrl', url);
     },
     getAuthUrl: () => {
         return store.get('authUrl') || defaultConfig.authUrl;
     },
-    setAuthUrl: (url) => {
+    setAuthUrl: (url, force = false) => {
+        if (!force && !isAllowedUrl(url)) {
+            throw new Error(`Blocked: "${url}" is not an allowed auth host. ` +
+                `Allowed: ${ALLOWED_HOSTS.join(', ')}. Use --force to override.`);
+        }
         store.set('authUrl', url);
     },
     // Proxy
@@ -146,6 +235,30 @@ export const config = {
     },
     getAll: () => {
         return store.store;
+    },
+    // Session token (per-session proxy auth, stored in OS keychain)
+    getSessionToken: async () => {
+        try {
+            const token = await keytar.getPassword(KEYCHAIN_SERVICE, KEYCHAIN_SESSION_TOKEN);
+            return token || undefined;
+        }
+        catch {
+            return undefined;
+        }
+    },
+    setSessionToken: async (token) => {
+        try {
+            await keytar.setPassword(KEYCHAIN_SERVICE, KEYCHAIN_SESSION_TOKEN, token);
+        }
+        catch {
+            logger.warning('Could not store session token in OS keychain');
+        }
+    },
+    clearSessionToken: async () => {
+        try {
+            await keytar.deletePassword(KEYCHAIN_SERVICE, KEYCHAIN_SESSION_TOKEN);
+        }
+        catch { /* ignore */ }
     },
     // Reset to defaults
     reset: () => {

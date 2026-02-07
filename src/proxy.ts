@@ -2,9 +2,10 @@ import express from 'express';
 import axios from 'axios';
 import ora, { type Ora } from 'ora';
 import chalk from 'chalk';
+import { randomBytes } from 'node:crypto';
 import { config } from './config.js';
 import { authenticate, ensureAuthenticated, getAccessToken, refreshTokens } from './auth.js';
-import { logger, colors } from './logger.js';
+import { logger } from './logger.js';
 import { matcha, matchaDim, matchaBright, bobaFrames, colorizeFrame } from './art.js';
 import { formatToolResult } from './formatter.js';
 
@@ -30,7 +31,7 @@ function formatDuration(ms: number): string {
 
 interface ProxyServer {
   start: () => Promise<void>;
-  stop: () => void;
+  stop: () => Promise<void>;
 }
 
 // Tool descriptions for prettier logging
@@ -106,11 +107,27 @@ export function createProxyServer(): ProxyServer {
   let server: any = null;
   let requestCount = 0;
 
+  // Per-session auth token — prevents other local processes from using the proxy
+  const sessionToken = randomBytes(32).toString('hex');
+
   app.use(express.json({ limit: '10mb' }));
+
+  // Session token middleware — require auth on all routes except /health
+  app.use((req, res, next) => {
+    if (req.path === '/health') {
+      return next();
+    }
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${sessionToken}`) {
+      res.status(403).json({ error: 'Invalid or missing session token' });
+      return;
+    }
+    next();
+  });
 
   // Health check
   app.get('/health', (req, res) => {
-    const tokens = config.getTokens();
+    const tokens = config.getTokensSync();
     res.json({
       status: 'ok',
       agent: tokens?.agentName || 'Not authenticated',
@@ -143,7 +160,7 @@ export function createProxyServer(): ProxyServer {
     }
 
     // Get current session info for auto-filling
-    const tokens = config.getTokens();
+    const tokens = await config.getTokens();
     const agentId = tokens?.agentId;
     const evmAddress = tokens?.evmAddress;
     const solanaAddress = tokens?.solanaAddress;
@@ -269,16 +286,13 @@ export function createProxyServer(): ProxyServer {
       }
     }
 
-    // Debug: log raw request from Claude and any modifications
-    logger.claudeRequest(tool, rawArgs, args);
-
     // Create spinner for this tool call
     const spinner = createToolSpinner(tool, getToolDescription(tool));
     spinner.start();
 
     try {
       // Ensure we have a valid token
-      let token = getAccessToken();
+      let token = await getAccessToken();
 
       if (!token || config.isTokenExpired()) {
         spinner.text = `${boba(tool)} ${bobaDim('Refreshing auth...')}`;
@@ -325,8 +339,6 @@ export function createProxyServer(): ProxyServer {
 
       res.json(response.data);
     } catch (error: any) {
-      const duration = Date.now() - startTime;
-
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
         const message = error.response?.data?.error || error.message;
@@ -391,7 +403,7 @@ export function createProxyServer(): ProxyServer {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    const token = getAccessToken();
+    const token = await getAccessToken();
     if (!token) {
       res.write(`data: ${JSON.stringify({ error: 'Not authenticated' })}\n\n`);
       res.end();
@@ -421,6 +433,9 @@ export function createProxyServer(): ProxyServer {
   return {
     start: async () => {
       const port = config.getProxyPort();
+
+      // Store session token in OS keychain for MCP bridge to read
+      await config.setSessionToken(sessionToken);
 
       // Authenticate first
       const tokens = await ensureAuthenticated();
@@ -489,7 +504,8 @@ export function createProxyServer(): ProxyServer {
       });
     },
 
-    stop: () => {
+    stop: async () => {
+      await config.clearSessionToken();
       if (server) {
         server.close();
         logger.info('Proxy server stopped');

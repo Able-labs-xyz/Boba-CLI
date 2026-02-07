@@ -26,9 +26,6 @@ export declare const logger: {
     proxy: (direction: "in" | "out", tool: string, data?: any) => void;
     agentAction: (action: string, details?: string) => void;
     section: (title: string) => void;
-    data: (label: string, data: any) => void;
-    debug: (label: string, data: any) => void;
-    claudeRequest: (tool: string, rawArgs: any, modifiedArgs: any) => void;
     blank: () => void;
 };
 export { colors };

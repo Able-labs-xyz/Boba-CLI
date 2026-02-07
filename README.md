@@ -25,23 +25,8 @@
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Able-labs-xyz/Boba-CLI/main/install.sh | bash
-```
-
-<details>
-<summary>Other installation methods</summary>
-
-**npm**
-```bash
 npm install -g @tradeboba/cli
 ```
-
-**yarn**
-```bash
-yarn global add @tradeboba/cli
-```
-
-</details>
 
 <br />
 
@@ -103,12 +88,26 @@ boba launch --iterm              # Use iTerm instead of Terminal
 
 <br />
 
+## Upgrading to v0.2.0
+
+> [!IMPORTANT]
+> v0.2.0 moves all credentials to the OS Keychain. After updating, re-initialize your agent:
+> ```bash
+> npm install -g @tradeboba/cli
+> boba init
+> ```
+
+<br />
+
 ## Security
 
 | | |
 |:--|:--|
-| **Credential Storage** | OS Keychain (macOS Keychain, Windows Credential Manager) |
-| **Transport** | HTTPS only |
+| **Credential Storage** | Agent secret + auth tokens stored in OS Keychain |
+| **Proxy Auth** | Per-session token — only the MCP bridge can call the proxy |
+| **Transport** | HTTPS enforced for all backend communication |
+| **URL Allowlisting** | Backend URLs restricted to known Boba hosts |
+| **No Debug Logging** | No sensitive data written to logs |
 | **Access Control** | Revoke anytime at [agents.boba.xyz](https://agents.boba.xyz) |
 
 <br />

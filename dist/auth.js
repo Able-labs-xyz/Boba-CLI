@@ -80,6 +80,11 @@ export async function authenticate() {
         return null;
     }
     const authUrl = config.getAuthUrl();
+    // Enforce HTTPS for non-local URLs to prevent credential exfiltration
+    if (!authUrl.startsWith('https://') && !authUrl.startsWith('http://localhost') && !authUrl.startsWith('http://127.0.0.1')) {
+        logger.error('Auth URL must use HTTPS (except localhost). Current: ' + authUrl);
+        return null;
+    }
     try {
         logger.info('Authenticating with Boba backend...');
         const response = await axios.post(`${authUrl}/user/auth/authenticate`, {
@@ -102,7 +107,7 @@ export async function authenticate() {
             solanaAddress: authData.solana_address,
             subOrganizationId: authData.sub_organization_id,
         };
-        config.setTokens(tokens);
+        await config.setTokens(tokens);
         logger.success(`Authenticated as ${tokens.agentName} (${tokens.agentId.slice(0, 8)}...)`);
         // Register agent with limit-orders service for trade execution
         await registerWithLimitOrders(tokens);
@@ -131,12 +136,17 @@ export async function authenticate() {
     }
 }
 export async function refreshTokens() {
-    const tokens = config.getTokens();
+    const tokens = await config.getTokens();
     if (!tokens?.refreshToken) {
         logger.warning('No refresh token available. Re-authenticating...');
         return authenticate();
     }
     const authUrl = config.getAuthUrl();
+    // Enforce HTTPS for non-local URLs to prevent token exfiltration
+    if (!authUrl.startsWith('https://') && !authUrl.startsWith('http://localhost') && !authUrl.startsWith('http://127.0.0.1')) {
+        logger.error('Auth URL must use HTTPS (except localhost). Current: ' + authUrl);
+        return null;
+    }
     try {
         logger.info('Refreshing access token...');
         const response = await axios.post(`${authUrl}/user/auth/refresh`, {
@@ -151,7 +161,7 @@ export async function refreshTokens() {
             accessToken: refreshData.access_token,
             accessTokenExpiresAt: refreshData.access_token_expires_at,
         };
-        config.setTokens(newTokens);
+        await config.setTokens(newTokens);
         logger.success('Token refreshed');
         return newTokens;
     }
@@ -162,7 +172,7 @@ export async function refreshTokens() {
 }
 export async function ensureAuthenticated() {
     // Check if we have valid tokens
-    const tokens = config.getTokens();
+    const tokens = await config.getTokens();
     if (!tokens) {
         return authenticate();
     }
@@ -172,7 +182,7 @@ export async function ensureAuthenticated() {
     }
     return tokens;
 }
-export function getAccessToken() {
-    const tokens = config.getTokens();
+export async function getAccessToken() {
+    const tokens = await config.getTokens();
     return tokens?.accessToken || null;
 }

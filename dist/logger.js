@@ -116,36 +116,6 @@ export const logger = {
         console.log(`  ${colors.matcha(title)}`);
         console.log(`${colors.matchaDim(line)}\n`);
     },
-    // Raw data display (for debugging)
-    data: (label, data) => {
-        console.log(`${timestamp()} ${colors.dim(label + ':')} ${colors.pearl(JSON.stringify(data, null, 2))}`);
-    },
-    // Debug logging (shows raw request/response details)
-    debug: (label, data) => {
-        const debugEnabled = process.env.BOBA_DEBUG === '1' || process.env.BOBA_DEBUG === 'true';
-        if (!debugEnabled)
-            return;
-        console.log(`${timestamp()} ${chalk.magenta('DEBUG')} ${chalk.magenta.bold(label)}`);
-        console.log(chalk.gray(JSON.stringify(data, null, 2)));
-    },
-    // Claude request logging (always shows in debug mode)
-    claudeRequest: (tool, rawArgs, modifiedArgs) => {
-        const debugEnabled = process.env.BOBA_DEBUG === '1' || process.env.BOBA_DEBUG === 'true';
-        if (!debugEnabled)
-            return;
-        console.log(`\n${timestamp()} ${chalk.cyan('┌──')} ${chalk.cyan.bold('CLAUDE REQUEST')}`);
-        console.log(`${chalk.cyan('│')} Tool: ${chalk.yellow(tool)}`);
-        console.log(`${chalk.cyan('│')} Raw args from Claude:`);
-        console.log(chalk.gray(JSON.stringify(rawArgs, null, 2).split('\n').map(l => `${chalk.cyan('│')}   ${l}`).join('\n')));
-        // Show if args were modified
-        const rawStr = JSON.stringify(rawArgs);
-        const modStr = JSON.stringify(modifiedArgs);
-        if (rawStr !== modStr) {
-            console.log(`${chalk.cyan('│')} ${chalk.yellow('⚡ Args modified by proxy:')}`);
-            console.log(chalk.gray(JSON.stringify(modifiedArgs, null, 2).split('\n').map(l => `${chalk.cyan('│')}   ${l}`).join('\n')));
-        }
-        console.log(`${chalk.cyan('└──')}\n`);
-    },
     // Blank line
     blank: () => console.log(),
 };
