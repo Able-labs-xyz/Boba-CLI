@@ -85,8 +85,13 @@ for target in "${TARGETS[@]}"; do
   npm publish "$pkg_dir" --access public $DRY_RUN
 done
 
+echo "==> Copying README into wrapper package..."
+cp "${GO_DIR}/README.md" "${NPM_DIR}/@tradeboba/cli/README.md"
+
 echo "==> Publishing main wrapper package..."
 npm publish "${NPM_DIR}/@tradeboba/cli" --access public $DRY_RUN
+
+rm -f "${NPM_DIR}/@tradeboba/cli/README.md"
 
 echo "==> Cleaning up binaries..."
 
