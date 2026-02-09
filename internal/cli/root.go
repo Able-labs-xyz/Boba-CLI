@@ -3,6 +3,8 @@ package cli
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -58,6 +60,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		config.Load()
 		logger.Init(config.GetLogLevel())
+		ensureMCPConfig()
 	},
 	Version: version.Version,
 }
@@ -348,6 +351,19 @@ func init() {
 	rootCmd.AddCommand(installCmd)
 	rootCmd.AddCommand(launchCmd)
 	rootCmd.AddCommand(mcpCmd)
+}
+
+// ensureMCPConfig silently updates the MCP config so Claude always
+// points to the current boba binary, even after npm updates.
+func ensureMCPConfig() {
+	bobaPath, err := exec.LookPath("boba")
+	if err != nil {
+		return
+	}
+	bobaPath, _ = filepath.Abs(bobaPath)
+	mcpArgs := []string{"mcp"}
+	_ = installDesktop(bobaPath, mcpArgs)
+	_ = installCode(bobaPath, mcpArgs)
 }
 
 func Execute() error {

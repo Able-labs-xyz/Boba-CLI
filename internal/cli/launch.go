@@ -527,8 +527,11 @@ func runLaunch(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("no credentials configured. Run 'boba login' first")
 	}
 
-	bobaPath, _ := os.Executable()
-	bobaPath, _ = filepath.EvalSymlinks(bobaPath)
+	bobaPath, err := exec.LookPath("boba")
+	if err != nil {
+		bobaPath, _ = os.Executable()
+	}
+	bobaPath, _ = filepath.Abs(bobaPath)
 	port := config.GetProxyPort()
 
 	if runtime.GOOS == "darwin" {
