@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -30,11 +31,18 @@ func init() {
 }
 
 func runInstall(cmd *cobra.Command, args []string) error {
-	binaryPath, err := os.Executable()
+	// Use the PATH-resolved location (e.g. /Users/x/.nvm/.../bin/boba)
+	// rather than os.Executable() which resolves deep into node_modules
+	// and breaks when npm reorganizes on updates.
+	binaryPath, err := exec.LookPath("boba")
 	if err != nil {
-		return fmt.Errorf("failed to determine binary path: %w", err)
+		// Fallback to os.Executable if not in PATH
+		binaryPath, err = os.Executable()
+		if err != nil {
+			return fmt.Errorf("failed to determine binary path: %w", err)
+		}
 	}
-	binaryPath, _ = filepath.EvalSymlinks(binaryPath)
+	binaryPath, _ = filepath.Abs(binaryPath)
 
 	mcpCommand := binaryPath
 	mcpArgs := []string{"mcp"}
