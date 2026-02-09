@@ -1,0 +1,72 @@
+#!/usr/bin/env node
+
+"use strict";
+
+const { spawnSync } = require("child_process");
+const path = require("path");
+
+const PLATFORMS = {
+  darwin: {
+    arm64: "@tradeboba/cli-darwin-arm64",
+    x64: "@tradeboba/cli-darwin-x64",
+  },
+  linux: {
+    x64: "@tradeboba/cli-linux-x64",
+    arm64: "@tradeboba/cli-linux-arm64",
+  },
+  win32: {
+    x64: "@tradeboba/cli-win32-x64",
+  },
+};
+
+function getBinaryPath() {
+  const platformPackages = PLATFORMS[process.platform];
+  if (!platformPackages) {
+    throw new Error(`Unsupported platform: ${process.platform}`);
+  }
+
+  const pkg = platformPackages[process.arch];
+  if (!pkg) {
+    throw new Error(
+      `Unsupported architecture: ${process.platform}-${process.arch}`
+    );
+  }
+
+  const binaryName = process.platform === "win32" ? "boba.exe" : "boba";
+
+  // Try require.resolve first (works when npm-installed)
+  try {
+    const pkgDir = path.dirname(require.resolve(`${pkg}/package.json`));
+    return path.join(pkgDir, "bin", binaryName);
+  } catch {}
+
+  // Fallback: check sibling directory (works for local install / development)
+  const localPath = path.join(__dirname, "..", "..", pkg.split("/")[1], "bin", binaryName);
+  const fs = require("fs");
+  if (fs.existsSync(localPath)) {
+    return localPath;
+  }
+
+  throw new Error(
+    `Could not find ${pkg}. Make sure it was installed correctly.\n` +
+      `Try reinstalling with: npm install -g @tradeboba/cli`
+  );
+}
+
+const binPath = getBinaryPath();
+const result = spawnSync(binPath, process.argv.slice(2), {
+  stdio: "inherit",
+  env: process.env,
+});
+
+if (result.error) {
+  if (result.error.code === "ENOENT") {
+    console.error(`Could not find binary at ${binPath}`);
+    console.error("Try reinstalling with: npm install -g @tradeboba/cli");
+  } else {
+    console.error(result.error.message);
+  }
+  process.exit(1);
+}
+
+process.exit(result.status ?? 1);

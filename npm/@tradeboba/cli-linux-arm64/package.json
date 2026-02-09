@@ -1,0 +1,14 @@
+{
+  "name": "@tradeboba/cli-linux-arm64",
+  "version": "0.0.0",
+  "description": "Boba CLI binary for Linux ARM64",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

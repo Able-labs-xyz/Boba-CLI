@@ -1,0 +1,14 @@
+{
+  "name": "@tradeboba/cli-linux-x64",
+  "version": "0.0.0",
+  "description": "Boba CLI binary for Linux x64",
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

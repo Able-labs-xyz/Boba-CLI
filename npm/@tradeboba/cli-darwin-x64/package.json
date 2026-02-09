@@ -1,0 +1,14 @@
+{
+  "name": "@tradeboba/cli-darwin-x64",
+  "version": "0.0.0",
+  "description": "Boba CLI binary for macOS Intel",
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

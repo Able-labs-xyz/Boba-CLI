@@ -1,0 +1,52 @@
+version: 2
+
+project_name: boba
+
+builds:
+  - main: ./cmd/boba
+    binary: boba
+    ldflags:
+      - -s -w
+      - -X github.com/tradeboba/boba-cli/internal/version.Version={{.Version}}
+      - -X github.com/tradeboba/boba-cli/internal/version.Commit={{.Commit}}
+      - -X github.com/tradeboba/boba-cli/internal/version.Date={{.Date}}
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+
+brews:
+  - repository:
+      owner: Able-labs-xyz
+      name: boba-proxy
+    name: boba
+    homepage: "https://github.com/Able-labs-xyz/Boba-CLI"
+    description: "Boba Agent CLI — Connect AI agents to decentralized trading"
+    install: |
+      bin.install "boba"
+    test: |
+      system "#{bin}/boba", "--version"

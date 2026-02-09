@@ -1,0 +1,18 @@
+{
+  "name": "@tradeboba/cli",
+  "version": "0.0.0",
+  "description": "Boba CLI — AI agent trading toolkit",
+  "bin": {
+    "boba": "bin/boba"
+  },
+  "optionalDependencies": {
+    "@tradeboba/cli-darwin-arm64": "0.0.0",
+    "@tradeboba/cli-darwin-x64": "0.0.0",
+    "@tradeboba/cli-linux-x64": "0.0.0",
+    "@tradeboba/cli-linux-arm64": "0.0.0",
+    "@tradeboba/cli-win32-x64": "0.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

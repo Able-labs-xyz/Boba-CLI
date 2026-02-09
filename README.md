@@ -4,7 +4,6 @@
 
 <p align="center">
   <img src="https://img.shields.io/npm/v/@tradeboba/cli?color=B184F5&style=flat-square" alt="npm" />
-  <img src="https://img.shields.io/badge/node-%3E%3D18-B184F5?style=flat-square" alt="node" />
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-B184F5?style=flat-square" alt="platform" />
   <img src="https://img.shields.io/badge/license-MIT-B184F5?style=flat-square" alt="license" />
 </p>
@@ -33,15 +32,11 @@ npm install -g @tradeboba/cli
 ## Quick Start
 
 ```bash
-# 1. Set up your agent credentials (from agents.boba.xyz)
-boba init
-
-# 2. Configure Claude Desktop & Claude Code
-boba install
-
-# 3. Launch everything
-boba launch
+npm install -g @tradeboba/cli
+boba
 ```
+
+That's it — the interactive menu walks you through everything.
 
 <br />
 
@@ -49,23 +44,24 @@ boba launch
 
 | Command | Description |
 |:--------|:------------|
-| `boba init` | Set up agent credentials |
-| `boba start` | Start the MCP proxy server |
-| `boba install` | Auto-configure Claude Desktop & Code |
-| `boba launch` | Start proxy + open Claude |
-| `boba status` | Show connection status |
-| `boba config` | View or update configuration |
-| `boba logout` | Clear stored credentials |
+| `boba login` | Log in with your agent credentials |
+| `boba install` | Set up Claude to use Boba |
+| `boba launch` | Start trading with Claude |
+| `boba start` | Run the Boba proxy |
+| `boba status` | See if everything's working |
+| `boba config` | Change your settings |
+| `boba auth` | Test your connection |
+| `boba logout` | Sign out |
 
 <details>
 <summary>Command options</summary>
 
 ```bash
-boba start --port 4000           # Custom port
-boba install --desktop-only      # Claude Desktop only
-boba install --code-only         # Claude Code only
-boba launch --desktop            # Open Desktop instead of Code
-boba launch --iterm              # Use iTerm instead of Terminal
+boba login --agent-id ID --secret S   # Non-interactive login
+boba start --port 4000                 # Custom port
+boba install --desktop-only            # Claude Desktop only
+boba install --code-only               # Claude Code only
+boba launch --iterm                    # Use iTerm instead of Terminal (macOS)
 ```
 
 </details>
@@ -88,13 +84,23 @@ boba launch --iterm              # Use iTerm instead of Terminal
 
 <br />
 
-## Upgrading to v0.2.0
+## Upgrading to v0.3.0
 
 > [!IMPORTANT]
-> v0.2.0 moves all credentials to the OS Keychain. After updating, re-initialize your agent:
+> v0.3.0 is a full rewrite — the CLI is now a native Go binary shipped through npm. It's faster, has no Node.js runtime dependency, and includes an interactive TUI.
+>
+> **What changed:**
+> - `boba init` is now `boba login` (`boba init` still works as an alias)
+> - Interactive menus — just run `boba` to see all options
+> - `boba launch` now lets you pick Claude Code or Claude Desktop
+> - `boba launch` now lets you launch with layouts
+> - `boba login` now has onboarding flow 
+> - Nice TUI changes using BubbleTea, LipGloss and HuH
+>
+> **To upgrade:**
 > ```bash
 > npm install -g @tradeboba/cli
-> boba init
+> boba login
 > ```
 
 <br />
