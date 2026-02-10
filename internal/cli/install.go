@@ -44,8 +44,17 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	}
 	binaryPath, _ = filepath.Abs(binaryPath)
 
-	mcpCommand := binaryPath
-	mcpArgs := []string{"mcp"}
+	// On Windows, npm installs a .cmd wrapper. Claude Desktop can't
+	// execute .cmd files directly — wrap with cmd.exe /c.
+	var mcpCommand string
+	var mcpArgs []string
+	if runtime.GOOS == "windows" && strings.HasSuffix(strings.ToLower(binaryPath), ".cmd") {
+		mcpCommand = "cmd.exe"
+		mcpArgs = []string{"/c", binaryPath, "mcp"}
+	} else {
+		mcpCommand = binaryPath
+		mcpArgs = []string{"mcp"}
+	}
 
 	var desktopErr, codeErr error
 	desktopSkipped := flagCodeOnly

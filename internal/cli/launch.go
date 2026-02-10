@@ -475,13 +475,14 @@ func launchTerminalLinux(bobaPath string) error {
 
 // launchTerminalWindows tries Windows Terminal, then falls back to cmd.exe.
 func launchTerminalWindows(bobaPath string) error {
-	startCmd := bobaPath + " start"
+	quoted := `"` + bobaPath + `"`
 
 	if wtPath, err := exec.LookPath("wt.exe"); err == nil {
-		c := exec.Command(wtPath, "new-tab", "--", startCmd)
+		c := exec.Command(wtPath, "new-tab", "--", quoted, "start")
 		return c.Start()
 	}
-	c := exec.Command("cmd.exe", "/c", "start", "cmd.exe", "/k", startCmd)
+	// cmd.exe /c start requires an empty title arg (the "") before the command
+	c := exec.Command("cmd.exe", "/c", "start", "", "cmd.exe", "/k", quoted, "start")
 	return c.Start()
 }
 

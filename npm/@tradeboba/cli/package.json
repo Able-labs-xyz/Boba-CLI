@@ -1,6 +1,6 @@
 {
   "name": "@tradeboba/cli",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Boba CLI — AI agent trading toolkit",
   "bin": {
     "boba": "bin/boba"
@@ -12,11 +12,11 @@
   "homepage": "https://agents.boba.xyz",
   "license": "MIT",
   "optionalDependencies": {
-    "@tradeboba/cli-darwin-arm64": "0.3.1",
-    "@tradeboba/cli-darwin-x64": "0.3.1",
-    "@tradeboba/cli-linux-x64": "0.3.1",
-    "@tradeboba/cli-linux-arm64": "0.3.1",
-    "@tradeboba/cli-win32-x64": "0.3.1"
+    "@tradeboba/cli-darwin-arm64": "0.3.2",
+    "@tradeboba/cli-darwin-x64": "0.3.2",
+    "@tradeboba/cli-linux-x64": "0.3.2",
+    "@tradeboba/cli-linux-arm64": "0.3.2",
+    "@tradeboba/cli-win32-x64": "0.3.2"
   },
   "publishConfig": {
     "access": "public"

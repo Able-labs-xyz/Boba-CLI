@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -361,9 +362,19 @@ func ensureMCPConfig() {
 		return
 	}
 	bobaPath, _ = filepath.Abs(bobaPath)
-	mcpArgs := []string{"mcp"}
-	_ = installDesktop(bobaPath, mcpArgs)
-	_ = installCode(bobaPath, mcpArgs)
+
+	var mcpCommand string
+	var mcpArgs []string
+	if runtime.GOOS == "windows" && strings.HasSuffix(strings.ToLower(bobaPath), ".cmd") {
+		mcpCommand = "cmd.exe"
+		mcpArgs = []string{"/c", bobaPath, "mcp"}
+	} else {
+		mcpCommand = bobaPath
+		mcpArgs = []string{"mcp"}
+	}
+
+	_ = installDesktop(mcpCommand, mcpArgs)
+	_ = installCode(mcpCommand, mcpArgs)
 }
 
 func Execute() error {
